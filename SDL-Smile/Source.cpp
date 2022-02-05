@@ -7,6 +7,7 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
+
 typedef struct rec
 {
     int xMin, xMax;
@@ -33,7 +34,7 @@ int main(int argc, char** args)
     SDL_Init(SDL_INIT_EVERYTHING);
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
-    SDL_Window* window = SDL_CreateWindow("Jerrys smile", SDL_WINDOWPOS_UNDEFINED,
+    SDL_Window* window = SDL_CreateWindow("Williams Spel", SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_Event event;
@@ -47,19 +48,21 @@ int main(int argc, char** args)
     SDL_Texture* backgroundTextureRoom4 = NULL;
     SDL_Texture* backgroundTextureRoom5 = NULL;
     SDL_Texture* backgroundTextureRoom6 = NULL;
+    SDL_Texture* backgroundTextureRoom7 = NULL;
     
 
     // Bakgrunderna ligger i SDL-Smile
     SDL_Surface* tempBackgroundRoom0 = IMG_Load("roomStart.png");
-    SDL_Surface* tempBackgroundRoom1 = IMG_Load("rum1.png");
-    SDL_Surface* tempBackgroundRoom2 = IMG_Load("rum2.png");
-    SDL_Surface* tempBackgroundRoom3 = IMG_Load("rum3.png");
-    SDL_Surface* tempBackgroundRoom4 = IMG_Load("rum4.png");
-    SDL_Surface* tempBackgroundRoom5 = IMG_Load("rum5.png");
-    SDL_Surface* tempBackgroundRoom6 = IMG_Load("rum6.png");
+    SDL_Surface* tempBackgroundRoom1 = IMG_Load("room1.png");
+    SDL_Surface* tempBackgroundRoom2 = IMG_Load("room2.png");
+    SDL_Surface* tempBackgroundRoom3 = IMG_Load("room3.png");
+    SDL_Surface* tempBackgroundRoom4 = IMG_Load("room4.png");
+    SDL_Surface* tempBackgroundRoom5 = IMG_Load("room5.png");
+    SDL_Surface* tempBackgroundRoom6 = IMG_Load("room6.png");
+    SDL_Surface* tempBackgroundRoom7 = IMG_Load("bossRoom.png");
     
     
-    SDL_Surface* temp = IMG_Load("face.png");
+    SDL_Surface* temp = IMG_Load("william.png");
     SDL_Texture* hud = NULL;
     SDL_Surface* tempHud = IMG_Load("heart.png");
 
@@ -89,6 +92,7 @@ int main(int argc, char** args)
     backgroundTextureRoom4 = SDL_CreateTextureFromSurface(renderer, tempBackgroundRoom4);
     backgroundTextureRoom5 = SDL_CreateTextureFromSurface(renderer, tempBackgroundRoom5);
     backgroundTextureRoom6 = SDL_CreateTextureFromSurface(renderer, tempBackgroundRoom6);
+    backgroundTextureRoom7 = SDL_CreateTextureFromSurface(renderer, tempBackgroundRoom7);
     hud = SDL_CreateTextureFromSurface(renderer, tempHud);
     //Deleting the temporary surface
     SDL_FreeSurface(temp);
@@ -99,6 +103,7 @@ int main(int argc, char** args)
     SDL_FreeSurface(tempBackgroundRoom4);
     SDL_FreeSurface(tempBackgroundRoom5);
     SDL_FreeSurface(tempBackgroundRoom6);
+    SDL_FreeSurface(tempBackgroundRoom7);
     SDL_FreeSurface(tempHud);
     SDL_Rect rectHud;
     rectHud.x = 20;
@@ -201,18 +206,8 @@ int main(int argc, char** args)
         playerRect.x = smileX;
         playerRect.y = smileY;
 
-        //Från start rum till rum 4
-        if (hastX == -1 && smileX == 0 && roomNr == 0 && (smileY >= 250 || smileY <= 350))
-        {
-            if (!moved)
-            {
-                moved = true;
-                roomNr = 4;
-                smileX = 700;
-            }
-        }
-        //Från start rum till rum 2
-        else if (hastX == 1 && smileX == 700 && roomNr == 0 && (smileY >= 250 || smileY <= 350))
+        //Från start till rum 2
+        if (hastX == 1 && smileX == 700 && roomNr == 0 && (smileY >= 250 || smileY <= 350))
         {
             if (!moved)
             {
@@ -221,6 +216,154 @@ int main(int argc, char** args)
                 smileX = 0;
                 std::cout << "Går till rum 2 från start";
             }
+        }
+        //Från start till rum 1
+        else if (hastY == -1 && smileY == 0 && roomNr == 0 && (smileX >= 250 || smileX <= 350))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 1;
+                smileY = 500;
+                std::cout << "Går från start till rum 1";
+            }
+        }
+        //Från rum 1 till start
+        else if (hastY == 1 && smileY == 500 && roomNr == 1 && (smileX >= 250 || smileX <= 350))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 0;
+                smileY = 0;
+                std::cout << "Går från rum 1 till start";
+            }
+        }
+        // Från rum 1 till boss room
+        else if (hastY == -1 && smileY == 0 && roomNr == 1 && (smileX >= 250 || smileX <= 350))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 7;
+                smileY = 0;
+                std::cout << "Går från rum 1 till boss room";
+            }
+        }
+        // Från boss room till room 1
+        else if (hastY == 1 && smileY == 500 && roomNr == 7 && (smileX >= 300 || smileX <= 400))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 1;
+                smileY = 0;
+                std::cout << "Går från boss room till rum 1";
+            }
+        }
+        // Från start till rum 3
+        else if (hastY == 1 && smileY == 500 && roomNr == 0 && (smileX >= 250 || smileX <= 350))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 3;
+                smileY = 0;
+                std::cout << "Går från start till rum 3";
+            }
+        }
+        // Från rum 3 till start
+        else if (hastY == -1 && smileY == 0 && roomNr == 3 && (smileX >= 200 || smileX <= 400))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 0;
+                smileY = 500;
+                
+                std::cout << "Går från rum 3 till start";
+            }
+        }
+
+        //Från start till rum 4
+        else if (hastX == -1 && smileX == 0 && roomNr == 0 && (smileY >= 250 || smileY <= 350))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 4;
+                smileX = 700;
+                std::cout << "Går till rum 4 från start";
+            }
+        }
+        //Från rum 4 till start
+        else if (hastX == 1 && smileX == 700 && roomNr == 4 && (smileY >= 250 || smileY <= 350))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 0;
+                smileX = 0;
+                std::cout << "Går till start från rum 4";
+            }
+        }
+        // Från rum 2 till start
+        else if (hastX == -1 && smileX == 0 && roomNr == 2 && (smileY >= 210 || smileY <= 350))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 0;
+                smileX = 700;
+                std::cout << "Går från rum 2 till start";
+            }
+        }
+
+        // Från rum 3 till rum 5
+        else if (hastX == -1 && smileX == 0 && roomNr == 3 && (smileY >= 210 || smileY <= 350))
+        {
+            if (!moved)
+            {
+                moved = true;
+                roomNr = 5;
+                smileX = 700;
+                std::cout << "Går från rum 3 till rum 5";
+            }
+        }
+        // Från rum 5 till rum 3
+        else if (hastX == 1 && smileX == 700 && roomNr == 5 && (smileY >= 210 || smileY <= 300))
+        {
+        if (!moved)
+        {
+            moved = true;
+            roomNr = 3;
+            smileX = 0;
+            std::cout << "Går från rum 5 till rum 3";
+        }
+        }
+
+        // Från rum 3 till rum 6
+        else if (hastY == 1 && smileY == 500 && roomNr == 3 && (smileY >= 300 || smileY <= 400))
+        {
+        if (!moved)
+        {
+            moved = true;
+            roomNr = 6;
+            smileY = 0;
+            std::cout << "Går från rum 3 till rum 6";
+        }
+        }
+
+        // Från rum 6 till rum 3
+        else if (hastY == -1 && smileY == 0 && roomNr == 6 && (smileX >= 300 || smileX <= 400))
+        {
+        if (!moved)
+        {
+            moved = true;
+            roomNr = 3;
+            smileY = 500;
+            std::cout << "Går från rum 6 till rum 3";
+        }
         }
 
         //Copying the texture on to the window using renderer and rectangle
@@ -251,6 +394,10 @@ int main(int argc, char** args)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom6, NULL, &rectBackground);
         }
+        else if (roomNr == 7)
+        {
+            SDL_RenderCopy(renderer, backgroundTextureRoom7, NULL, &rectBackground);
+        }
 
         if (roomNr == 1 && intersection(playerRect, rectNyckel))
         {
@@ -278,7 +425,7 @@ int main(int argc, char** args)
     SDL_DestroyTexture(backgroundTextureRoom4);
     SDL_DestroyTexture(backgroundTextureRoom5);
     SDL_DestroyTexture(backgroundTextureRoom6);
-    //SDL_DestroyTexture(backgroundTextureRoom7);
+    SDL_DestroyTexture(backgroundTextureRoom7);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
