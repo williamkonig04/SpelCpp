@@ -66,7 +66,7 @@ int main(int argc, char** args)
     SDL_Texture* hud = NULL;
     SDL_Surface* tempHud = IMG_Load("heart.png");
 
-    //nyckel
+    //Nyckel karta
     SDL_Texture* keyTexture = NULL;
     SDL_Surface* surfaceTemp = IMG_Load("key.png");
     keyTexture = SDL_CreateTextureFromSurface(renderer, surfaceTemp);
@@ -76,6 +76,27 @@ int main(int argc, char** args)
     rectNyckel.w = 50;
     rectNyckel.h = 50;
 
+    //Brev Bild
+    SDL_Texture* brevTexture = NULL;
+    SDL_Surface* brevSurfaceTemp = IMG_Load("brev.png");
+    brevTexture = SDL_CreateTextureFromSurface(renderer, brevSurfaceTemp);
+    SDL_Rect rectBrev;
+    rectBrev.x = 500;
+    rectBrev.y = 100;
+    rectBrev.w = 50;
+    rectBrev.h = 50;
+
+    //Brev Text
+    SDL_Texture* brevTextTexture = NULL;
+    SDL_Surface* brevTextSurfaceTemp = IMG_Load("brevText.png");
+    brevTextTexture = SDL_CreateTextureFromSurface(renderer, brevTextSurfaceTemp);
+    SDL_Rect rectBrevText;
+    rectBrevText.x = 500;
+    rectBrevText.y = 100;
+    rectBrevText.w = 200;
+    rectBrevText.h = 200;
+
+    // Nyckel HUD
     SDL_Rect rectNyckelInv;
     rectNyckelInv.x = 600;
     rectNyckelInv.y = 20;
@@ -130,6 +151,15 @@ int main(int argc, char** args)
     int roomNr = 0; // Start game in start room
     bool moved = false;
     bool showKey = false;
+
+    // Brev
+    bool showBrev = true;
+    bool lookingAtBrev = false;
+    bool haveReadBrev = false;
+
+    // Nycklar
+    bool nycklar[3];
+
     while (!quit)
     {
         while (SDL_PollEvent(&event)) {
@@ -244,10 +274,18 @@ int main(int argc, char** args)
         {
             if (!moved)
             {
-                moved = true;
-                roomNr = 7;
-                smileY = 0;
-                std::cout << "Går från rum 1 till boss room";
+                
+                if (nycklar[2] == true)
+                {
+                    moved = true;
+                    roomNr = 7;
+                    smileY = 0;
+                    std::cout << "Går från rum 1 till boss room";
+                }
+                else
+                {
+                    std::cout << "Du behöver nyckel till bossen.";
+                }
             }
         }
         // Från boss room till room 1
@@ -319,15 +357,29 @@ int main(int argc, char** args)
             }
         }
 
-        // Från rum 3 till rum 5
-        else if (hastX == -1 && smileX == 0 && roomNr == 3 && (smileY >= 210 || smileY <= 350))
+        // Från rum 2 till rum 6
+        else if (hastY == 1 && smileY == 500 && roomNr == 2 && (smileX >= 300 || smileX <= 400))
+        {
+        if (!moved)
+        {
+            moved = true;
+            roomNr = 6;
+            smileX = 700;
+            smileY = 250;
+            std::cout << "Går från rum 2 till rum 6";
+        }
+        }
+
+        // Från rum 3 till rum 6
+        else if (hastY == -1 && smileY == 500 && roomNr == 3 && (smileY >= 300 || smileY <= 400))
         {
             if (!moved)
             {
                 moved = true;
-                roomNr = 5;
-                smileX = 700;
-                std::cout << "Går från rum 3 till rum 5";
+                roomNr = 6;
+                smileX = 350;
+                smileY = 500;
+                std::cout << "Går från rum 3 till rum 6";
             }
         }
         // Från rum 5 till rum 3
@@ -366,11 +418,30 @@ int main(int argc, char** args)
         }
         }
 
+        // Från rum 6 till rum 2
+        else if (hastX == 1 && smileX == 700 && roomNr == 6 && (smileY >= 200 || smileY <= 300))
+        {
+        if (!moved)
+        {
+            moved = true;
+            roomNr = 2;
+            smileY = 500;
+            smileX = 350;
+            std::cout << "Går från rum 6 till rum 2";
+        }
+        }
+
         //Copying the texture on to the window using renderer and rectangle
         // Renderar det rum man är i
         if (roomNr == 0) {
             SDL_RenderCopy(renderer, backgroundTextureRoom0, NULL, &rectBackground);
+            
         }
+        if (showBrev == true)
+        {
+            SDL_RenderCopy(renderer, brevTexture, NULL, &rectBrev);
+        }
+
         else if (roomNr == 1) {
             SDL_RenderCopy(renderer, backgroundTextureRoom1, NULL, &rectBackground);
         }
@@ -399,11 +470,18 @@ int main(int argc, char** args)
             SDL_RenderCopy(renderer, backgroundTextureRoom7, NULL, &rectBackground);
         }
 
-        if (roomNr == 1 && intersection(playerRect, rectNyckel))
+        if (roomNr == 1 && intersection(playerRect, rectNyckel)) // Plockar upp nyckeln
         {
             showKey = true;
         }
-        if (showKey)
+        if (roomNr == 0 && intersection(playerRect, rectBrev) && showBrev == true) // Läser brev
+        {
+            std::cout << "PÅ BREV" << std::endl;
+            haveReadBrev = true;
+            lookingAtBrev = true;
+            SDL_RenderCopy(renderer, brevTextTexture, NULL, &rectBrev);
+        }
+        if (showKey) // Visar Nyckel i HUD
         {
             SDL_RenderCopy(renderer, keyTexture, NULL, &rectNyckelInv);
         }
@@ -411,9 +489,31 @@ int main(int argc, char** args)
         {
             SDL_RenderCopy(renderer, keyTexture, NULL, &rectNyckel);
         }
+
+
+       
+
+
         SDL_RenderCopy(renderer, texture, NULL, &playerRect);
         SDL_RenderCopy(renderer, hud, NULL, &rectHud);
         SDL_RenderPresent(renderer);
+        if (haveReadBrev == true && intersection(playerRect, rectBrev) == false)
+        {
+            showBrev = false;
+            lookingAtBrev = false;
+            rectBrev.w = 50;
+            rectBrev.h = 50;
+            rectBrev.x = 500;
+            rectBrev.y = 100;
+        }
+        if (lookingAtBrev == true)
+        {
+            showBrev = true;
+            rectBrev.w = 500;
+            rectBrev.h = 500;
+            rectBrev.x = 100;
+            rectBrev.y = 100;
+        }
     }
 
     //Deleting the texture
