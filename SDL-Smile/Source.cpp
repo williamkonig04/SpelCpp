@@ -3,9 +3,13 @@
 //In order to access SDL_image features, we must include SDL_image.h
 #include <SDL_image.h>
 #include <iostream>
+#include <time.h>
+#include <Windows.h>
 #undef main
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
+
+bool dice();
 
 
 typedef struct rec
@@ -71,8 +75,8 @@ int main(int argc, char** args)
     SDL_Surface* surfaceTemp = IMG_Load("key.png");
     keyTexture = SDL_CreateTextureFromSurface(renderer, surfaceTemp);
     SDL_Rect rectNyckel;
-    rectNyckel.x = 500;
-    rectNyckel.y = 300;
+    rectNyckel.x = 300;
+    rectNyckel.y = 200;
     rectNyckel.w = 50;
     rectNyckel.h = 50;
 
@@ -95,6 +99,16 @@ int main(int argc, char** args)
     rectBrevText.y = 100;
     rectBrevText.w = 200;
     rectBrevText.h = 200;
+
+    //Goblin Bild
+    SDL_Texture* goblinTexture = NULL;
+    SDL_Surface* goblinSurfaceTemp = IMG_Load("goblin.png");
+    goblinTexture = SDL_CreateTextureFromSurface(renderer, goblinSurfaceTemp);
+    SDL_Rect rectGoblin;
+    rectGoblin.x = 60;
+    rectGoblin.y = 150;
+    rectGoblin.w = 200;
+    rectGoblin.h = 200;
 
     // Nyckel HUD
     SDL_Rect rectNyckelInv;
@@ -148,7 +162,7 @@ int main(int argc, char** args)
     int smileY = playerRect.y;
     int hastX = 0;
     int hastY = 0;
-    int roomNr = 0; // Start game in start room
+    int roomNr = 4; // Start game in start room
     bool moved = false;
     bool showKey = false;
 
@@ -160,8 +174,18 @@ int main(int argc, char** args)
     // Nycklar
     bool nycklar[3];
 
+    // Dice
+    bool wonDice = false;
+
+
+    for (int i = 0; i < 3; i++)
+    {
+        nycklar[i] = false;
+    }
+
     while (!quit)
     {
+
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_KEYDOWN:
@@ -247,6 +271,7 @@ int main(int argc, char** args)
                 std::cout << "Går till rum 2 från start";
             }
         }
+
         //Från start till rum 1
         else if (hastY == -1 && smileY == 0 && roomNr == 0 && (smileX >= 250 || smileX <= 350))
         {
@@ -258,6 +283,7 @@ int main(int argc, char** args)
                 std::cout << "Går från start till rum 1";
             }
         }
+
         //Från rum 1 till start
         else if (hastY == 1 && smileY == 500 && roomNr == 1 && (smileX >= 250 || smileX <= 350))
         {
@@ -269,6 +295,7 @@ int main(int argc, char** args)
                 std::cout << "Går från rum 1 till start";
             }
         }
+
         // Från rum 1 till boss room
         else if (hastY == -1 && smileY == 0 && roomNr == 1 && (smileX >= 250 || smileX <= 350))
         {
@@ -288,6 +315,7 @@ int main(int argc, char** args)
                 }
             }
         }
+
         // Från boss room till room 1
         else if (hastY == 1 && smileY == 500 && roomNr == 7 && (smileX >= 300 || smileX <= 400))
         {
@@ -299,6 +327,7 @@ int main(int argc, char** args)
                 std::cout << "Går från boss room till rum 1";
             }
         }
+    
         // Från start till rum 3
         else if (hastY == 1 && smileY == 500 && roomNr == 0 && (smileX >= 250 || smileX <= 350))
         {
@@ -310,6 +339,7 @@ int main(int argc, char** args)
                 std::cout << "Går från start till rum 3";
             }
         }
+        
         // Från rum 3 till start
         else if (hastY == -1 && smileY == 0 && roomNr == 3 && (smileX >= 200 || smileX <= 400))
         {
@@ -334,6 +364,7 @@ int main(int argc, char** args)
                 std::cout << "Går till rum 4 från start";
             }
         }
+       
         //Från rum 4 till start
         else if (hastX == 1 && smileX == 700 && roomNr == 4 && (smileY >= 250 || smileY <= 350))
         {
@@ -345,6 +376,7 @@ int main(int argc, char** args)
                 std::cout << "Går till start från rum 4";
             }
         }
+      
         // Från rum 2 till start
         else if (hastX == -1 && smileX == 0 && roomNr == 2 && (smileY >= 210 || smileY <= 350))
         {
@@ -382,6 +414,7 @@ int main(int argc, char** args)
                 std::cout << "Går från rum 3 till rum 6";
             }
         }
+
         // Från rum 5 till rum 3
         else if (hastX == 1 && smileX == 700 && roomNr == 5 && (smileY >= 210 || smileY <= 300))
         {
@@ -442,53 +475,69 @@ int main(int argc, char** args)
             SDL_RenderCopy(renderer, brevTexture, NULL, &rectBrev);
         }
 
-        else if (roomNr == 1) {
+        if (roomNr == 1) {
             SDL_RenderCopy(renderer, backgroundTextureRoom1, NULL, &rectBackground);
         }
-        else if (roomNr == 2)
+        if (roomNr == 2)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom2, NULL, &rectBackground);
         }
-        else if (roomNr == 3)
+        if (roomNr == 3)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom3, NULL, &rectBackground);
         }
-        else if (roomNr == 4)
+        if (roomNr == 4)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom4, NULL, &rectBackground);
+            SDL_RenderCopy(renderer, goblinTexture, NULL, &rectGoblin);
+
+            if (intersection(playerRect, rectGoblin) && wonDice == false)
+            {
+                
+                while (wonDice == false)
+                {
+                    wonDice = dice();
+                    Sleep(100);
+                }
+            }
+            if (wonDice == true)
+            {
+                SDL_RenderCopy(renderer, keyTexture, NULL, &rectNyckel);
+            }
         }
-        else if (roomNr == 5)
+        if (roomNr == 5)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom5, NULL, &rectBackground);
         }
-        else if (roomNr == 6)
+        if (roomNr == 6)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom6, NULL, &rectBackground);
         }
-        else if (roomNr == 7)
+        if (roomNr == 7)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom7, NULL, &rectBackground);
         }
 
-        if (roomNr == 1 && intersection(playerRect, rectNyckel)) // Plockar upp nyckeln
+        if (roomNr == 4 && intersection(playerRect, rectNyckel) && wonDice == true) // Plockar upp nyckeln
         {
             showKey = true;
+            nycklar[0] = true;
         }
+
+        
         if (roomNr == 0 && intersection(playerRect, rectBrev) && showBrev == true) // Läser brev
         {
-            std::cout << "PÅ BREV" << std::endl;
             haveReadBrev = true;
             lookingAtBrev = true;
             SDL_RenderCopy(renderer, brevTextTexture, NULL, &rectBrev);
         }
+
         if (showKey) // Visar Nyckel i HUD
         {
             SDL_RenderCopy(renderer, keyTexture, NULL, &rectNyckelInv);
         }
-        else if (roomNr == 1 && !showKey)
-        {
-            SDL_RenderCopy(renderer, keyTexture, NULL, &rectNyckel);
-        }
+
+
 
 
        
@@ -535,4 +584,28 @@ int main(int argc, char** args)
     SDL_Quit();
 
     return 0;
+}
+
+bool dice()
+{
+    
+    srand(time(NULL));
+    int playerRand = rand() % 6 + 1;
+    srand(time(NULL) + 10);
+    int goblinRand = rand() % 6 + 1;
+
+    if (playerRand > goblinRand)
+    {
+        std::cout << "WON";
+        return true;
+    }
+    if (playerRand < goblinRand)
+    {
+        std::cout << "LOST";
+        return false;
+    }
+    if (playerRand == goblinRand)
+    {
+        std::cout << "DRAW";
+    }
 }

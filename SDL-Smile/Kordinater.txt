@@ -1,0 +1,29 @@
+ -- Start --
+Room1: x350 y0
+Room2: x700 y225
+Room3: x340 y500
+Room4: x0 y 250
+
+ -- Room 1 --
+Start: x359 y500
+BossRoom: x350 y0
+
+
+ -- Room 2 --
+Start: x9 y230
+
+ -- Room 3 --
+Start: x350 y0
+Room 5: x0 y 225
+Room 6: x350 y500
+
+ -- Room 5 --
+Room 3: x700 y240
+
+ -- Room 6 --
+Room 3: x325 y 0
+Room 2: x700 y240
+
+
+ -- Boss Room --
+Room 1: x 350 y500
