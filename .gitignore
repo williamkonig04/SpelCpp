@@ -3,3 +3,11 @@
 ################################################################################
 
 /SDL-Smile/Release/x64
+/SDL-Smile/Release/Win32
+/SDL-Smile/Debug/Win32
+/SDL-Smile/Debug/x64
+/.vs/SDL/v17
+/Debug
+/Release
+/SDL2-2.0.20
+/SDL2_image-2.0.5

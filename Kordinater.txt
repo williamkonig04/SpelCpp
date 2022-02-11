@@ -1,4 +1,0 @@
- -- Start --
-Room1: x350 y0
-Room2: x700 y225
-Room3: x340 y500
