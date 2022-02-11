@@ -5,11 +5,13 @@
 #include <iostream>
 #include <time.h>
 #include <Windows.h>
+#include <string>
 #undef main
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
 bool dice();
+void print(std::string text);
 
 
 typedef struct rec
@@ -75,10 +77,20 @@ int main(int argc, char** args)
     SDL_Surface* surfaceTemp = IMG_Load("key.png");
     keyTexture = SDL_CreateTextureFromSurface(renderer, surfaceTemp);
     SDL_Rect rectNyckel;
-    rectNyckel.x = 300;
-    rectNyckel.y = 200;
+    rectNyckel.x = 230;
+    rectNyckel.y = 30;
     rectNyckel.w = 50;
     rectNyckel.h = 50;
+
+    //Nyckel 2 karta
+    SDL_Texture* key2Texture = NULL;
+    SDL_Surface* key2surfaceTemp = IMG_Load("key.png");
+    key2Texture = SDL_CreateTextureFromSurface(renderer, key2surfaceTemp);
+    SDL_Rect rectNyckel2;
+    rectNyckel2.x = 115;
+    rectNyckel2.y = 235;
+    rectNyckel2.w = 50;
+    rectNyckel2.h = 50;
 
     //Brev Bild
     SDL_Texture* brevTexture = NULL;
@@ -89,6 +101,26 @@ int main(int argc, char** args)
     rectBrev.y = 100;
     rectBrev.w = 50;
     rectBrev.h = 50;
+
+    //Kung Bild
+    SDL_Texture* kungTexture = NULL;
+    SDL_Surface* kungSurfaceTemp = IMG_Load("kung.png");
+    kungTexture = SDL_CreateTextureFromSurface(renderer, kungSurfaceTemp);
+    SDL_Rect rectKung;
+    rectKung.x = 500;
+    rectKung.y = 100;
+    rectKung.w = 200;
+    rectKung.h = 200;
+
+    //Chest Bild
+    SDL_Texture* chestTexture = NULL;
+    SDL_Surface* chestSurfaceTemp = IMG_Load("chest.png");
+    chestTexture = SDL_CreateTextureFromSurface(renderer, chestSurfaceTemp);
+    SDL_Rect rectChest;
+    rectChest.x = 160;
+    rectChest.y = 370;
+    rectChest.w = 200;
+    rectChest.h = 200;
 
     //Brev Text
     SDL_Texture* brevTextTexture = NULL;
@@ -117,6 +149,24 @@ int main(int argc, char** args)
     rectNyckelInv.w = 30;
     rectNyckelInv.h = 30;
 
+    // Nyckel 2 HUD
+    SDL_Rect rectNyckel2Inv;
+    rectNyckel2Inv.x = 700;
+    rectNyckel2Inv.y = 20;
+    rectNyckel2Inv.w = 30;
+    rectNyckel2Inv.h = 30;
+
+    //Gammal gubbe
+    SDL_Texture* gubbeTexture = NULL;
+    SDL_Surface* gubbeSurfaceTemp = IMG_Load("old_man.jpg");
+    gubbeTexture = SDL_CreateTextureFromSurface(renderer, gubbeSurfaceTemp);
+    SDL_Rect rectGubbe;
+    rectGubbe.x = 450;
+    rectGubbe.y = 60;
+    rectGubbe.w = 100;
+    rectGubbe.h = 100;
+    bool pratatMedGubbe = false;
+    
 
     //Filling texture with the image using a surface
     texture = SDL_CreateTextureFromSurface(renderer, temp);
@@ -162,7 +212,7 @@ int main(int argc, char** args)
     int smileY = playerRect.y;
     int hastX = 0;
     int hastY = 0;
-    int roomNr = 4; // Start game in start room
+    int roomNr = 0; // Start game in start room
     bool moved = false;
     bool showKey = false;
 
@@ -173,10 +223,16 @@ int main(int argc, char** args)
 
     // Nycklar
     bool nycklar[3];
+    bool key2Visible = false;
 
     // Dice
     bool wonDice = false;
+    std::string renderPlayerDice, renderGoblinDice;
 
+    bool chestOpen = false;
+
+
+    
 
     for (int i = 0; i < 3; i++)
     {
@@ -415,6 +471,19 @@ int main(int argc, char** args)
             }
         }
 
+        // Från rum 3 till rum 5
+        else if (hastX == -1 && smileX == 0 && roomNr == 3 && (smileY >= 200 || smileY <= 300))
+        {
+        if (!moved)
+        {
+            moved = true;
+            roomNr = 5;
+            smileX = 350;
+            smileY = 500;
+            std::cout << "Går från rum 3 till rum 6";
+        }
+        }
+
         // Från rum 5 till rum 3
         else if (hastX == 1 && smileX == 700 && roomNr == 5 && (smileY >= 210 || smileY <= 300))
         {
@@ -481,6 +550,25 @@ int main(int argc, char** args)
         if (roomNr == 2)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom2, NULL, &rectBackground);
+            SDL_RenderCopy(renderer, gubbeTexture, NULL, &rectGubbe);
+
+
+            if (intersection(playerRect, rectGubbe) == true && smileX > 415 && smileY < 70 && pratatMedGubbe == false)
+            {
+                std::string input;
+                std::cout << "The more of this there is, the less you see. What is it?";
+                std::getline(std::cin, input);
+                if (input == "darkness")
+                {
+                    std::cout << "Good, remember that.";
+                    pratatMedGubbe = true;
+                }
+                else
+                {
+                    std::cout << "Wrong.";
+                }
+            }
+
         }
         if (roomNr == 3)
         {
@@ -491,27 +579,67 @@ int main(int argc, char** args)
             SDL_RenderCopy(renderer, backgroundTextureRoom4, NULL, &rectBackground);
             SDL_RenderCopy(renderer, goblinTexture, NULL, &rectGoblin);
 
-            if (intersection(playerRect, rectGoblin) && wonDice == false)
+            if (intersection(playerRect, rectGoblin) == true && wonDice == false && smileX < 190 && smileY > 90 && smileY < 260)
             {
                 
+                print("player intersect with goblin, wonDice false");
                 while (wonDice == false)
                 {
                     wonDice = dice();
                     Sleep(100);
                 }
             }
-            if (wonDice == true)
+            if (wonDice == true) // Nyckeln dyker upp
             {
-                SDL_RenderCopy(renderer, keyTexture, NULL, &rectNyckel);
+                if (nycklar[0]==false) // Nyckeln försvinner när man plockat upp den
+                {
+                    SDL_RenderCopy(renderer, keyTexture, NULL, &rectNyckel);
+                }
+                
             }
         }
         if (roomNr == 5)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom5, NULL, &rectBackground);
+            SDL_RenderCopy(renderer, kungTexture, NULL, &rectKung);
         }
         if (roomNr == 6)
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom6, NULL, &rectBackground);
+            SDL_RenderCopy(renderer, chestTexture, NULL, &rectChest);
+
+            if (intersection(playerRect, rectChest) && chestOpen == false && smileX > 130 && smileX < 290 && smileY > 290 && smileY < 470)
+            {
+                print("Intersection with chest, chestOpen false");
+                std::cout << "What was the answer to the old man's riddle?";
+                std::string input;
+                std::getline(std::cin, input);
+                if (input == "darkness")
+                {
+                    std::cout << "What color was the torch?";
+                    std::getline(std::cin, input);
+                    if (input == "blue")
+                    {
+                        chestOpen = true;
+                        key2Visible = true;
+                        
+                    }
+                }
+            }
+            if (chestOpen == true && key2Visible == true)
+            {
+                if (intersection(playerRect, rectNyckel2))
+                {
+                    SDL_RenderCopy(renderer, key2Texture, NULL, &rectNyckel2Inv);
+                    key2Visible = false;
+                    nycklar[1] = true;
+                }
+            }
+            if (key2Visible == true)
+            {
+                SDL_RenderCopy(renderer, key2Texture, NULL, &rectNyckel2);
+            }
+            
         }
         if (roomNr == 7)
         {
@@ -523,7 +651,6 @@ int main(int argc, char** args)
             showKey = true;
             nycklar[0] = true;
         }
-
         
         if (roomNr == 0 && intersection(playerRect, rectBrev) && showBrev == true) // Läser brev
         {
@@ -532,16 +659,14 @@ int main(int argc, char** args)
             SDL_RenderCopy(renderer, brevTextTexture, NULL, &rectBrev);
         }
 
-        if (showKey) // Visar Nyckel i HUD
+        if (showKey == true) // Visar Nyckel i HUD
         {
             SDL_RenderCopy(renderer, keyTexture, NULL, &rectNyckelInv);
         }
-
-
-
-
-       
-
+        if (nycklar[1]==true)
+        {
+            SDL_RenderCopy(renderer, key2Texture, NULL, &rectNyckel2Inv);
+        }
 
         SDL_RenderCopy(renderer, texture, NULL, &playerRect);
         SDL_RenderCopy(renderer, hud, NULL, &rectHud);
@@ -608,4 +733,8 @@ bool dice()
     {
         std::cout << "DRAW";
     }
+}
+
+void print(std::string text) {
+    std::cout << text;
 }
