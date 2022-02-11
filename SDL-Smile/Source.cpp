@@ -55,6 +55,8 @@ int main(int argc, char** args)
     SDL_Texture* backgroundTextureRoom5 = NULL;
     SDL_Texture* backgroundTextureRoom6 = NULL;
     SDL_Texture* backgroundTextureRoom7 = NULL;
+    SDL_Texture* roomWonTexture = NULL;
+    SDL_Texture* roomLostTexture = NULL;
     
 
     // Bakgrunderna ligger i SDL-Smile
@@ -66,6 +68,8 @@ int main(int argc, char** args)
     SDL_Surface* tempBackgroundRoom5 = IMG_Load("room5.png");
     SDL_Surface* tempBackgroundRoom6 = IMG_Load("room6.png");
     SDL_Surface* tempBackgroundRoom7 = IMG_Load("bossRoom.png");
+    SDL_Surface* roomWonTemp = IMG_Load("won.png");
+    SDL_Surface* roomLostTemp = IMG_Load("lost.png");
     
     
     SDL_Surface* temp = IMG_Load("william.png");
@@ -142,6 +146,26 @@ int main(int argc, char** args)
     rectGoblin.w = 200;
     rectGoblin.h = 200;
 
+    // Boss bild
+    SDL_Texture* bossTexture = NULL;
+    SDL_Surface* bossSurface = IMG_Load("monster.png");
+    bossTexture = SDL_CreateTextureFromSurface(renderer, bossSurface);
+    SDL_Rect rectBoss;
+    rectBoss.x = 55;
+    rectBoss.y = 55;
+    rectBoss.w = 200;
+    rectBoss.h = 200;
+
+    // ghost bild
+    SDL_Texture* ghostTexture = NULL;
+    SDL_Surface* ghostSurface = IMG_Load("ghost.png");
+    ghostTexture = SDL_CreateTextureFromSurface(renderer, ghostSurface);
+    SDL_Rect rectGhost;
+    rectGhost.x = 20;
+    rectGhost.y = 30;
+    rectGhost.w = 50;
+    rectGhost.h = 50;
+
     // Nyckel HUD
     SDL_Rect rectNyckelInv;
     rectNyckelInv.x = 600;
@@ -178,6 +202,8 @@ int main(int argc, char** args)
     backgroundTextureRoom5 = SDL_CreateTextureFromSurface(renderer, tempBackgroundRoom5);
     backgroundTextureRoom6 = SDL_CreateTextureFromSurface(renderer, tempBackgroundRoom6);
     backgroundTextureRoom7 = SDL_CreateTextureFromSurface(renderer, tempBackgroundRoom7);
+    roomWonTexture = SDL_CreateTextureFromSurface(renderer, roomWonTemp);
+    roomLostTexture = SDL_CreateTextureFromSurface(renderer, roomLostTemp);
     hud = SDL_CreateTextureFromSurface(renderer, tempHud);
     //Deleting the temporary surface
     SDL_FreeSurface(temp);
@@ -189,6 +215,8 @@ int main(int argc, char** args)
     SDL_FreeSurface(tempBackgroundRoom5);
     SDL_FreeSurface(tempBackgroundRoom6);
     SDL_FreeSurface(tempBackgroundRoom7);
+    SDL_FreeSurface(roomWonTemp);
+    SDL_FreeSurface(roomLostTemp);
     SDL_FreeSurface(tempHud);
     SDL_Rect rectHud;
     rectHud.x = 20;
@@ -222,7 +250,7 @@ int main(int argc, char** args)
     bool haveReadBrev = false;
 
     // Nycklar
-    bool nycklar[3];
+    bool nycklar[2];
     bool key2Visible = false;
 
     // Dice
@@ -231,13 +259,28 @@ int main(int argc, char** args)
 
     bool chestOpen = false;
 
+    // Boss
+    bool ghostAlive = true;
+    bool bossAlive = true;
+    bool playerAlive = true;
+
 
     
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 2; i++)
     {
         nycklar[i] = false;
     }
+
+    ///////// DEV MODE /////////
+    bool devMode = false;
+    roomNr = 0;
+    if (devMode == true)
+    {
+        nycklar[0] = true;
+        nycklar[1] = true;
+    }
+    ///////// DEV MODE /////////
 
     while (!quit)
     {
@@ -358,7 +401,7 @@ int main(int argc, char** args)
             if (!moved)
             {
                 
-                if (nycklar[2] == true)
+                if (nycklar[0] == true && nycklar[1] == true)
                 {
                     moved = true;
                     roomNr = 7;
@@ -641,9 +684,70 @@ int main(int argc, char** args)
             }
             
         }
-        if (roomNr == 7)
+        if (roomNr == 7) // Boss
         {
             SDL_RenderCopy(renderer, backgroundTextureRoom7, NULL, &rectBackground);
+            
+            
+            
+
+            if (playerAlive == true)
+            {
+                if (bossAlive == true)
+                {
+                    SDL_RenderCopy(renderer, bossTexture, NULL, &rectBoss);
+                    if (ghostAlive == true) // Moves ghost in a rectangle
+                    {
+                        SDL_RenderCopy(renderer, ghostTexture, NULL, &rectGhost);
+                        if (rectGhost.x < 265 && rectGhost.y == 30)// Right
+                        {
+                            rectGhost.x++;
+                            Sleep(0.5);
+                            SDL_RenderCopy(renderer, ghostTexture, NULL, &rectGhost);
+                        }
+                        if (rectGhost.x == 265 && rectGhost.y < 260) //Down
+                        {
+                            rectGhost.y++;
+                            Sleep(0.5);
+                            SDL_RenderCopy(renderer, ghostTexture, NULL, &rectGhost);
+                        }
+                        if (rectGhost.x > 20 && rectGhost.y == 260)//Left
+                        {
+                            rectGhost.x--;
+                            Sleep(0.5);
+                            SDL_RenderCopy(renderer, ghostTexture, NULL, &rectGhost);
+                        }
+                        if (rectGhost.x == 20 && rectGhost.y > 30)//UP
+                        {
+                            rectGhost.y--;
+                            Sleep(0.5);
+                            SDL_RenderCopy(renderer, ghostTexture, NULL, &rectGhost);
+                        }
+
+                    }
+                    if (intersection(playerRect, rectGhost)) // Player died
+                    {
+                        playerAlive = false;
+                        roomNr = 9;
+                    }
+                    if (intersection(playerRect, rectBoss)) // Player killed boss
+                    {
+                        bossAlive = false;
+                        roomNr = 8;
+                    }
+                }
+            }
+
+        }
+
+        if (roomNr == 8) // WON ROOM
+        {
+            SDL_RenderCopy(renderer, roomWonTexture, NULL, &rectBackground);
+        }
+
+        if (roomNr == 9) // LOST ROOM
+        {
+            SDL_RenderCopy(renderer, roomLostTexture, NULL, &rectBackground);
         }
 
         if (roomNr == 4 && intersection(playerRect, rectNyckel) && wonDice == true) // Plockar upp nyckeln

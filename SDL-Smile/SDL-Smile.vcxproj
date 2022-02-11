@@ -90,6 +90,7 @@
     <IntDir>$(SolutionDir)$(Configuration)\$(Platform)\</IntDir>
     <LibraryPath>$(SolutionDir)SDL2-2.0.20\lib\x64;$(SolutionDir)SDL2_image-2.0.5\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <IncludePath>$(SolutionDir)SDL2-2.0.20\include;$(SolutionDir)SDL2_image-2.0.5\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <TargetName>WilliamSpelCpp</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
